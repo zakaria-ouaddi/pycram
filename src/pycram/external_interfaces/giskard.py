@@ -3,6 +3,7 @@ import threading
 
 import sys
 
+from giskardpy_ros.python_interface.python_interface import GiskardWrapper
 
 from ..ros import Time, node
 from ..ros import logwarn, loginfo_once, loginfo
@@ -22,7 +23,7 @@ from ..ros import logging as log, node
 
 
 
-giskard_wrapper = None
+giskard_wrapper: GiskardWrapper = None
 giskard_update_service = None
 is_init = False
 
@@ -314,6 +315,7 @@ def achieve_joint_goal(goal_poses: Dict[str, float]) -> 'ExecutionState':
     :return: MoveResult message for this goal
     """
     set_joint_goal(goal_poses)
+    giskard_wrapper.motion_goals.allow_collision()
     return giskard_wrapper.execute()
 
 
@@ -687,6 +689,10 @@ def allow_gripper_collision(gripper: Arms, at_goal: bool = False) -> None:
                 giskard_wrapper.motion_goals.allow_collision(gripper_group, CollisionEntry.ALL)
             else:
                 giskard_wrapper.allow_collision(gripper_group, CollisionEntry.ALL)
+
+@init_giskard_interface
+def allow_all_collision():
+    giskard_wrapper.motion_goals.allow_all_collisions()
 
 
 @init_giskard_interface
