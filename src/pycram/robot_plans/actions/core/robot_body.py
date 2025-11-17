@@ -19,6 +19,7 @@ from ....robot_plans.motions.gripper import MoveGripperMotion
 from ....robot_plans.motions.robot_body import MoveJointsMotion
 from ....validation.goal_validator import create_multiple_joint_goal_validator
 
+from ....external_interfaces import giskard
 
 @has_parameters
 @dataclass
@@ -109,7 +110,9 @@ class ParkArmsAction(ActionDescription):
     def plan(self) -> None:
         joint_poses = self.get_joint_poses()
 
-        MoveJointsMotion(names=list(joint_poses.keys()), positions=list(joint_poses.values())).perform()
+        # We bypass MoveJointsMotion to use the blind mode directly.
+        # This prevents the robot from getting stuck if it is slightly touching the table.
+        giskard.achieve_joint_goal_blind(joint_poses)
 
     def get_joint_poses(self) -> Dict[str, float]:
         """
